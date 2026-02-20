@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finance vs. Cash Calculator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:             #09090f;
+      --bg-card:        #0e0e1c;
+      --bg-input:       #0b0b17;
+      --gold:           #c9a84c;
+      --gold-light:     #e8c870;
+      --gold-dim:       #8a6a1e;
+      --gold-glow:      rgba(201,168,76,0.14);
+      --text:           #ede5d0;
+      --text-muted:     #6e6860;
+      --border:         rgba(201,168,76,0.15);
+      --border-bright:  rgba(201,168,76,0.5);
+      --blue:           #4a9fd4;
+      --blue-glow:      rgba(74,159,212,0.1);
+      --green:          #4ab87a;
+      --green-glow:     rgba(74,184,122,0.1);
+    }
+
+    /* ─── Base ─────────────────────────────────────────────────── */
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(rgba(201,168,76,0.03) 1px, transparent 1px);
+      background-size: 28px 28px;
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 15% 15%, rgba(201,168,76,0.04) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 85%, rgba(201,168,76,0.04) 0%, transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── Header ────────────────────────────────────────────────── */
+    header {
+      text-align: center;
+      padding: 3rem 0 2.5rem;
+    }
+
+    .header-ornament {
+      color: var(--gold-dim);
+      font-size: 0.9rem;
+      letter-spacing: 1.2rem;
+      margin-bottom: 1.2rem;
+      opacity: 0.8;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(
+        135deg,
+        var(--gold-dim) 0%,
+        var(--gold) 30%,
+        var(--gold-light) 50%,
+        var(--gold) 70%,
+        var(--gold-dim) 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.6rem;
+      line-height: 1.1;
+    }
+
+    h1 .vs {
+      font-style: italic;
+      font-weight: 300;
+      opacity: 0.85;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      margin-bottom: 1.6rem;
+    }
+
+    .header-rule {
+      width: 90px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 0 auto;
+    }
+
+    /* ─── Card ───────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    /* ─── Section Label ──────────────────────────────────────────── */
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ─── Inputs ─────────────────────────────────────────────────── */
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 1.4rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: var(--border-bright);
+      box-shadow: 0 0 0 3px var(--gold-glow);
+    }
+
+    .input-wrapper .pre,
+    .input-wrapper .suf {
+      padding: 0.72rem 0.75rem;
+      color: var(--gold);
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: rgba(201,168,76,0.06);
+      flex-shrink: 0;
+    }
+
+    .input-wrapper .pre { border-right: 1px solid var(--border); }
+    .input-wrapper .suf { border-left:  1px solid var(--border); }
+
+    .input-wrapper input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 0.72rem 0.9rem;
+      width: 100%;
+      min-width: 0;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    .input-hint {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    /* ─── Button ─────────────────────────────────────────────────── */
+    .calculate-btn {
+      display: block;
+      width: 100%;
+      padding: 1rem 2rem;
+      background: linear-gradient(
+        135deg,
+        var(--gold-dim) 0%,
+        var(--gold) 35%,
+        var(--gold-light) 60%,
+        var(--gold) 80%,
+        var(--gold-dim) 100%
+      );
+      border: none;
+      border-radius: 9px;
+      color: #07070e;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s, box-shadow 0.2s, transform 0.1s;
+      box-shadow: 0 4px 24px rgba(201,168,76,0.28);
+    }
+
+    .calculate-btn:hover {
+      opacity: 0.92;
+      box-shadow: 0 4px 36px rgba(201,168,76,0.45);
+    }
+
+    .calculate-btn:active { transform: scale(0.99); }
+
+    /* ─── Results ────────────────────────────────────────────────── */
+    #results { display: none; }
+
+    #results.visible {
+      display: block;
+      animation: fadeUp 0.45s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Scenarios ──────────────────────────────────────────────── */
+    .scenarios {
+      display: grid;
+      grid-template-columns: 1fr 52px 1fr;
+      gap: 0;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 680px) {
+      .scenarios {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .vs-divider { flex-direction: row; height: 36px; }
+      .vs-line { width: 100%; height: 1px; }
+      .vs-line-v { display: none; }
+    }
+
+    /* ─── Scenario Card ──────────────────────────────────────────── */
+    .scenario-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scenario-card.finance-card {
+      border-color: rgba(74,159,212,0.18);
+      background: linear-gradient(160deg, rgba(74,159,212,0.04) 0%, var(--bg-card) 40%);
+    }
+
+    .scenario-card.cash-card {
+      border-color: rgba(74,184,122,0.18);
+      background: linear-gradient(200deg, rgba(74,184,122,0.04) 0%, var(--bg-card) 40%);
+    }
+
+    .scenario-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+
+    .finance-card::before {
+      background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    }
+
+    .cash-card::before {
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+    }
+
+    .scenario-title {
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 1.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .finance-card .scenario-title { color: var(--blue); }
+    .cash-card    .scenario-title { color: var(--green); }
+
+    .scenario-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      opacity: 0.3;
+    }
+
+    .finance-card .scenario-title::after { background: var(--blue); }
+    .cash-card    .scenario-title::after { background: var(--green); }
+
+    /* ─── Stats ──────────────────────────────────────────────────── */
+    .stat {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat:last-child { border-bottom: none; padding-bottom: 0; }
+    .stat:first-of-type { padding-top: 0; }
+
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-value {
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .stat-value.accent-blue  { color: var(--blue); }
+    .stat-value.accent-green { color: var(--green); }
+    .stat-value.accent-gold  { color: var(--gold-light); }
+
+    .stat-note {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* ─── VS Divider ─────────────────────────────────────────────── */
+    .vs-divider {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .vs-line {
+      flex: 1;
+      width: 1px;
+      background: linear-gradient(
+        180deg,
+        transparent,
+        rgba(201,168,76,0.15) 20%,
+        var(--gold-dim) 50%,
+        rgba(201,168,76,0.15) 80%,
+        transparent
+      );
+    }
+
+    .vs-badge {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--gold-dim);
+      flex-shrink: 0;
+    }
+
+    /* ─── Recommendation ─────────────────────────────────────────── */
+    .recommendation {
+      border-radius: 14px;
+      padding: 2.2rem 2rem;
+      text-align: center;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .recommendation::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+
+    .recommendation.finance-wins {
+      background: linear-gradient(135deg, rgba(74,159,212,0.06) 0%, var(--bg-card) 60%);
+      border-color: rgba(74,159,212,0.25);
+    }
+
+    .recommendation.finance-wins::before {
+      background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    }
+
+    .recommendation.cash-wins {
+      background: linear-gradient(135deg, rgba(74,184,122,0.06) 0%, var(--bg-card) 60%);
+      border-color: rgba(74,184,122,0.25);
+    }
+
+    .recommendation.cash-wins::before {
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+    }
+
+    .recommendation.tie {
+      background: linear-gradient(135deg, rgba(201,168,76,0.05) 0%, var(--bg-card) 60%);
+      border-color: rgba(201,168,76,0.25);
+    }
+
+    .recommendation.tie::before {
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .rec-eyebrow {
+      font-size: 0.62rem;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.7rem;
+    }
+
+    .rec-verdict {
+      font-size: clamp(1.5rem, 3.5vw, 2.6rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+
+    .finance-wins .rec-verdict { color: var(--blue); }
+    .cash-wins    .rec-verdict { color: var(--green); }
+    .tie          .rec-verdict { color: var(--gold); }
+
+    .rec-amount {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 1.2rem;
+    }
+
+    .rec-amount strong { color: var(--text); font-weight: 600; }
+
+    .rec-rule {
+      width: 60px;
+      height: 1px;
+      margin: 0 auto 1.2rem;
+      background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+    }
+
+    .rec-detail {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      max-width: 580px;
+      margin: 0 auto;
+      line-height: 1.75;
+    }
+
+    .rec-detail strong { color: var(--text); }
+
+    /* ─── Error message ──────────────────────────────────────────── */
+    .error-msg {
+      background: rgba(220, 60, 60, 0.08);
+      border: 1px solid rgba(220, 60, 60, 0.25);
+      border-radius: 8px;
+      color: #e07070;
+      font-size: 0.82rem;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    /* ─── Footer ─────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 2rem 0 0;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      line-height: 1.7;
+    }
+
+    footer .footer-ornament {
+      color: var(--gold-dim);
+      letter-spacing: 0.8rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    /* ─── Responsive tweaks ──────────────────────────────────────── */
+    @media (max-width: 520px) {
+      .card, .scenario-card { padding: 1.4rem; }
+      .stat-value { font-size: 1.3rem; }
+      .input-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ═══════════ HEADER ═══════════ -->
+  <header>
+    <div class="header-ornament">◆ &nbsp; ◆ &nbsp; ◆</div>
+    <h1>Finance <span class="vs">vs</span> Cash</h1>
+    <p class="subtitle">Strategic Purchase Analysis</p>
+    <div class="header-rule"></div>
+  </header>
+
+  <!-- ═══════════ INPUTS ═══════════ -->
+  <div class="card">
+    <div class="section-label">◆ &nbsp; Purchase Details</div>
+
+    <div class="input-grid">
+
+      <div class="input-group">
+        <label>Purchase Price</label>
+        <div class="input-wrapper">
+          <span class="pre">$</span>
+          <input type="number" id="price" value="30000" min="0" step="100" />
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Down Payment</label>
+        <div class="input-wrapper">
+          <span class="pre">$</span>
+          <input type="number" id="downPayment" value="5000" min="0" step="100" />
+        </div>
+        <div class="input-hint" id="down-pct-hint"></div>
+      </div>
+
+      <div class="input-group">
+        <label>Loan Interest Rate</label>
+        <div class="input-wrapper">
+          <input type="number" id="loanRate" value="6.5" min="0" max="100" step="0.1" />
+          <span class="suf">%</span>
+        </div>
+        <div class="input-hint">Annual percentage rate</div>
+      </div>
+
+      <div class="input-group">
+        <label>Loan Term</label>
+        <div class="input-wrapper">
+          <input type="number" id="loanTerm" value="5" min="1" max="50" step="1" />
+          <span class="suf">yrs</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Expected Investment Return</label>
+        <div class="input-wrapper">
+          <input type="number" id="investReturn" value="8" min="0" max="100" step="0.1" />
+          <span class="suf">%</span>
+        </div>
+        <div class="input-hint">Annual return if cash invested instead</div>
+      </div>
+
+    </div>
+
+    <div class="error-msg" id="error-msg"></div>
+    <button class="calculate-btn" onclick="calculate()">◆ &nbsp; Calculate &nbsp; ◆</button>
+  </div>
+
+  <!-- ═══════════ RESULTS ═══════════ -->
+  <div id="results">
+
+    <div class="scenarios">
+
+      <!-- Finance Card -->
+      <div class="scenario-card finance-card">
+        <div class="scenario-title">Finance Option</div>
+
+        <div class="stat">
+          <div class="stat-label">Loan Amount</div>
+          <div class="stat-value" id="r-loan-amount">—</div>
+          <div class="stat-note" id="r-loan-pct"></div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Monthly Payment</div>
+          <div class="stat-value accent-blue" id="r-monthly-pmt">—</div>
+          <div class="stat-note" id="r-pmt-period"></div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Total Amount Paid</div>
+          <div class="stat-value" id="r-total-paid">—</div>
+          <div class="stat-note">Principal + interest + down payment</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Total Interest Paid</div>
+          <div class="stat-value accent-gold" id="r-total-interest">—</div>
+          <div class="stat-note">True cost of borrowing</div>
+        </div>
+      </div>
+
+      <!-- VS Divider -->
+      <div class="vs-divider">
+        <div class="vs-line"></div>
+        <div class="vs-badge">VS</div>
+        <div class="vs-line"></div>
+      </div>
+
+      <!-- Cash Card -->
+      <div class="scenario-card cash-card">
+        <div class="scenario-title">Cash Option</div>
+
+        <div class="stat">
+          <div class="stat-label">Amount Paid Upfront</div>
+          <div class="stat-value" id="r-cash-price">—</div>
+          <div class="stat-note">Full purchase price, no debt</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Opportunity Cost</div>
+          <div class="stat-value accent-gold" id="r-opp-cost">—</div>
+          <div class="stat-note" id="r-opp-note"></div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Investment Value (same period)</div>
+          <div class="stat-value accent-green" id="r-invest-value">—</div>
+          <div class="stat-note" id="r-invest-note"></div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Monthly Cash Flow Freed</div>
+          <div class="stat-value" id="r-monthly-freed">—</div>
+          <div class="stat-note">No loan payment due each month</div>
+        </div>
+      </div>
+
+    </div><!-- /scenarios -->
+
+    <!-- Recommendation -->
+    <div class="recommendation" id="recommendation"></div>
+
+  </div><!-- /results -->
+
+  <footer>
+    <div class="footer-ornament">◆</div>
+    <p>For illustrative purposes only. Past investment returns are not guaranteed.<br>
+       Consult a qualified financial advisor for personalized guidance.</p>
+  </footer>
+
+</div><!-- /container -->
+
+<script>
+  /* ─── Utilities ──────────────────────────────────────────────── */
+  const $ = id => document.getElementById(id);
+
+  function fmt(n) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(n);
+  }
+
+  function fmtPct(n) {
+    return n.toFixed(1) + '%';
+  }
+
+  /* ─── Live hint: down payment % ─────────────────────────────── */
+  function updateDownPct() {
+    const price = parseFloat($('price').value) || 0;
+    const down  = parseFloat($('downPayment').value) || 0;
+    const hint  = $('down-pct-hint');
+    if (price > 0) {
+      const pct = (down / price * 100).toFixed(1);
+      hint.textContent = pct + '% of purchase price';
+    } else {
+      hint.textContent = '';
+    }
+  }
+
+  $('price').addEventListener('input', updateDownPct);
+  $('downPayment').addEventListener('input', updateDownPct);
+
+  /* ─── Main calculation ───────────────────────────────────────── */
+  function calculate() {
+    const price        = parseFloat($('price').value)       || 0;
+    const downPayment  = parseFloat($('downPayment').value) || 0;
+    const annLoanRate  = parseFloat($('loanRate').value)    / 100 || 0;
+    const loanYears    = parseInt($('loanTerm').value)      || 5;
+    const annInvReturn = parseFloat($('investReturn').value) / 100 || 0;
+
+    const errEl = $('error-msg');
+
+    /* Validation */
+    if (price <= 0) {
+      errEl.textContent = 'Please enter a valid purchase price greater than zero.';
+      errEl.style.display = 'block';
+      return;
+    }
+    if (downPayment >= price) {
+      errEl.textContent = 'Down payment must be less than the purchase price. If paying in full, use the Cash scenario.';
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+
+    /* ─ Finance calculations ─ */
+    const loanAmt    = price - downPayment;
+    const mthRate    = annLoanRate / 12;
+    const numMonths  = loanYears * 12;
+
+    let monthlyPmt;
+    if (mthRate === 0) {
+      monthlyPmt = loanAmt / numMonths;
+    } else {
+      const factor = Math.pow(1 + mthRate, numMonths);
+      monthlyPmt = loanAmt * (mthRate * factor) / (factor - 1);
+    }
+
+    const totalLoanPmts  = monthlyPmt * numMonths;
+    const totalPaid      = totalLoanPmts + downPayment;
+    const totalInterest  = totalLoanPmts - loanAmt;
+
+    /* ─ Cash / opportunity cost calculations ─ */
+    const mthInvRate = annInvReturn / 12;
+    let cashFV;
+    if (mthInvRate === 0) {
+      cashFV = loanAmt;
+    } else {
+      cashFV = loanAmt * Math.pow(1 + mthInvRate, numMonths);
+    }
+    const oppCost = cashFV - loanAmt;   // foregone investment earnings on capital freed by financing
+
+    /* ─ Populate Finance card ─ */
+    $('r-loan-amount').textContent   = fmt(loanAmt);
+    $('r-loan-pct').textContent      = fmtPct(loanAmt / price * 100) + ' of purchase price financed';
+    $('r-monthly-pmt').textContent   = fmt(monthlyPmt);
+    $('r-pmt-period').textContent    = numMonths + ' payments over ' + loanYears + ' year' + (loanYears !== 1 ? 's' : '');
+    $('r-total-paid').textContent    = fmt(totalPaid);
+    $('r-total-interest').textContent = fmt(totalInterest);
+
+    /* ─ Populate Cash card ─ */
+    $('r-cash-price').textContent   = fmt(price);
+    $('r-opp-cost').textContent     = fmt(oppCost);
+    $('r-opp-note').textContent     = 'Foregone gains on loan amount over ' + loanYears + ' yr' + (loanYears !== 1 ? 's' : '') + ' at ' + fmtPct(annInvReturn * 100);
+    $('r-invest-value').textContent = fmt(cashFV);
+    $('r-invest-note').textContent  = fmt(loanAmt) + ' invested at ' + fmtPct(annInvReturn * 100) + ' for ' + loanYears + ' yr' + (loanYears !== 1 ? 's' : '');
+    $('r-monthly-freed').textContent = fmt(monthlyPmt);
+
+    /* ─ Recommendation ─
+       Core comparison:
+         Cost of financing  = totalInterest (interest you pay)
+         Cost of cash       = oppCost       (investment gains you forgo)
+       If opp cost > interest → financing is cheaper; invest the money.
+       If interest > opp cost → paying cash saves more money.
+    ─────────────────────────────────────────────────────────────── */
+    const diff = Math.abs(totalInterest - oppCost);
+    const recEl = $('recommendation');
+
+    if (Math.abs(totalInterest - oppCost) < 1) {
+      /* Tie */
+      recEl.className = 'recommendation tie';
+      recEl.innerHTML = `
+        <div class="rec-eyebrow">◆ &nbsp; Recommendation &nbsp; ◆</div>
+        <div class="rec-verdict">It's a Toss-Up</div>
+        <div class="rec-amount">The financial difference is negligible</div>
+        <div class="rec-rule"></div>
+        <div class="rec-detail">
+          Your loan interest cost of <strong>${fmt(totalInterest)}</strong> and the
+          opportunity cost of using cash <strong>${fmt(oppCost)}</strong> are nearly identical.
+          Consider other factors — liquidity needs, peace of mind, tax implications,
+          and risk tolerance — to make your decision.
+        </div>`;
+
+    } else if (oppCost > totalInterest) {
+      /* Finance wins */
+      recEl.className = 'recommendation finance-wins';
+      recEl.innerHTML = `
+        <div class="rec-eyebrow">◆ &nbsp; Recommendation &nbsp; ◆</div>
+        <div class="rec-verdict">Finance the Purchase</div>
+        <div class="rec-amount">Potential advantage: <strong>${fmt(diff)}</strong> over ${loanYears} year${loanYears !== 1 ? 's' : ''}</div>
+        <div class="rec-rule"></div>
+        <div class="rec-detail">
+          Your loan interest cost is <strong>${fmt(totalInterest)}</strong>, but investing the
+          loan amount <strong>${fmt(loanAmt)}</strong> at <strong>${fmtPct(annInvReturn * 100)}</strong> annually
+          would generate <strong>${fmt(oppCost)}</strong> in returns over the same period.
+          Because your expected investment return outpaces your borrowing cost, financing
+          the purchase frees your capital to work harder than the debt costs you.
+        </div>`;
+
+    } else {
+      /* Cash wins */
+      recEl.className = 'recommendation cash-wins';
+      recEl.innerHTML = `
+        <div class="rec-eyebrow">◆ &nbsp; Recommendation &nbsp; ◆</div>
+        <div class="rec-verdict">Pay in Cash</div>
+        <div class="rec-amount">Potential savings: <strong>${fmt(diff)}</strong> over ${loanYears} year${loanYears !== 1 ? 's' : ''}</div>
+        <div class="rec-rule"></div>
+        <div class="rec-detail">
+          Your loan interest cost of <strong>${fmt(totalInterest)}</strong> exceeds the
+          <strong>${fmt(oppCost)}</strong> you'd earn by investing the loan amount <strong>${fmt(loanAmt)}</strong>
+          at <strong>${fmtPct(annInvReturn * 100)}</strong> annually.
+          Eliminating the debt saves more than you'd gain from investing that capital,
+          making an outright purchase the stronger financial move.
+        </div>`;
+    }
+
+    /* Show results */
+    const resultsEl = $('results');
+    resultsEl.classList.remove('visible');
+    resultsEl.style.display = 'block';
+    void resultsEl.offsetHeight; /* force reflow for animation replay */
+    resultsEl.classList.add('visible');
+    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ─── Enter key triggers calculate ──────────────────────────── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') calculate();
+  });
+
+  /* ─── Run on load with defaults ─────────────────────────────── */
+  window.addEventListener('load', () => {
+    updateDownPct();
+    calculate();
+  });
+</script>
+</body>
+</html>
