@@ -3,33 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Finance vs. Cash Calculator</title>
+  <title>Gavin's First App With Claude</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:             #09090f;
-      --bg-card:        #0e0e1c;
-      --bg-input:       #0b0b17;
-      --gold:           #c9a84c;
-      --gold-light:     #e8c870;
-      --gold-dim:       #8a6a1e;
-      --gold-glow:      rgba(201,168,76,0.14);
-      --text:           #ede5d0;
-      --text-muted:     #6e6860;
-      --border:         rgba(201,168,76,0.15);
-      --border-bright:  rgba(201,168,76,0.5);
-      --blue:           #4a9fd4;
-      --blue-glow:      rgba(74,159,212,0.1);
-      --green:          #4ab87a;
-      --green-glow:     rgba(74,184,122,0.1);
+      --bg:             #032D60;
+      --bg-card:        #0D2845;
+      --bg-input:       #001639;
+      --gold:           #0176D3;
+      --gold-light:     #1B96FF;
+      --gold-dim:       #0B5FCA;
+      --gold-glow:      rgba(1,118,211,0.18);
+      --text:           #F3F2F1;
+      --text-muted:     #8CA6C8;
+      --border:         rgba(1,118,211,0.25);
+      --border-bright:  rgba(27,150,255,0.6);
+      --blue:           #1B96FF;
+      --blue-glow:      rgba(27,150,255,0.12);
+      --green:          #3BA755;
+      --green-glow:     rgba(46,132,74,0.12);
     }
 
     /* ─── Base ─────────────────────────────────────────────────── */
     body {
       background-color: var(--bg);
       background-image:
-        radial-gradient(rgba(201,168,76,0.03) 1px, transparent 1px);
+        radial-gradient(rgba(1,118,211,0.08) 1px, transparent 1px);
       background-size: 28px 28px;
       color: var(--text);
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -42,8 +42,8 @@
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(ellipse at 15% 15%, rgba(201,168,76,0.04) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 85%, rgba(201,168,76,0.04) 0%, transparent 55%);
+        radial-gradient(ellipse at 15% 15%, rgba(1,118,211,0.08) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 85%, rgba(27,150,255,0.06) 0%, transparent 55%);
       pointer-events: none;
       z-index: 0;
     }
@@ -84,6 +84,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      filter: brightness(1.15);
       margin-bottom: 0.6rem;
       line-height: 1.1;
     }
@@ -185,7 +186,7 @@
       color: var(--gold);
       font-size: 0.85rem;
       font-weight: 600;
-      background: rgba(201,168,76,0.06);
+      background: rgba(1,118,211,0.12);
       flex-shrink: 0;
     }
 
@@ -230,19 +231,19 @@
       );
       border: none;
       border-radius: 9px;
-      color: #07070e;
+      color: #ffffff;
       font-size: 0.78rem;
       font-weight: 800;
       letter-spacing: 0.3em;
       text-transform: uppercase;
       cursor: pointer;
       transition: opacity 0.2s, box-shadow 0.2s, transform 0.1s;
-      box-shadow: 0 4px 24px rgba(201,168,76,0.28);
+      box-shadow: 0 4px 24px rgba(1,118,211,0.4);
     }
 
     .calculate-btn:hover {
       opacity: 0.92;
-      box-shadow: 0 4px 36px rgba(201,168,76,0.45);
+      box-shadow: 0 4px 36px rgba(27,150,255,0.55);
     }
 
     .calculate-btn:active { transform: scale(0.99); }
@@ -542,7 +543,7 @@
   <!-- ═══════════ HEADER ═══════════ -->
   <header>
     <div class="header-ornament">◆ &nbsp; ◆ &nbsp; ◆</div>
-    <h1>Finance <span class="vs">vs</span> Cash</h1>
+    <h1>Gavin's First App With Claude</h1>
     <p class="subtitle">Strategic Purchase Analysis</p>
     <div class="header-rule"></div>
   </header>
